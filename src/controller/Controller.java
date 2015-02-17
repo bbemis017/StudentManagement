@@ -3,6 +3,7 @@ package controller;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 
 import database.Manager;
@@ -21,8 +22,7 @@ public class Controller {
 		dataBaseManager = new Manager(this);
 		login = new LoginView(this);
 		
-		//TODO: temp shortcut
-//		dataBaseView = new DataBaseView(this);
+
 	}
 	
 	public void updateTable(JTable table,String tableName){
@@ -46,6 +46,11 @@ public class Controller {
 
 	public String getTable() {
 		return table;
+	}
+	
+	public void invalidData(){
+		Object[] field ={"Invalid"};
+		JOptionPane.showConfirmDialog(null, field,"Invalid Data entry",JOptionPane.OK_OPTION);
 	}
 
 

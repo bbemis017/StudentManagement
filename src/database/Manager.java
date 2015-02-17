@@ -6,15 +6,22 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
+
 import java.util.Vector;
 
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
+
 
 import controller.Controller;
 
 public class Manager {
+	
+	public static final String SQL_SERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	public static final String URL = "jdbc:sqlserver://localhost;databaseName=School";
+	public static final String STUDENT="Student", CLASS="Class", ENROLLED_STUDENT="EnrolledStudent";
+	
+	public static final String INNER_JOIN_QUERY = "SELECT EnrolledClasses.StudentID, Student.Name, Class.ID,Class.Title FROM Student INNER JOIN EnrolledClasses " +
+			"ON Student.ID=EnrolledClasses.StudentID INNER JOIN Class ON Class.ID=EnrolledClasses.ClassID";
 	
 	private Connection connection;
 	private Controller control;
@@ -22,100 +29,149 @@ public class Manager {
 	public Manager(Controller control){
 		this.control = control;
 	}
-
-	
+	/**
+	 * Connects to the database
+	 * 
+	 * @param username - String user of database
+	 * @param password - String password of user to database
+	 * @return boolean true if connection was successful  false if connection was not
+	 */
 	public boolean connect(String username, String password){
 		try{
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			connection = DriverManager.getConnection("jdbc:sqlserver://localhost;databaseName=School",username,password);
-			
+			Class.forName(SQL_SERVER_DRIVER);
+			connection = DriverManager.getConnection(URL,username,password);
 			return true;
 		}catch(ClassNotFoundException e){
 			e.printStackTrace();
 		}catch(SQLException e){
 			return false;
 		}
-		System.err.println("Connection Error not Accounted For");
+		
 		return false;
 	}
 	
+	/**
+	 * Sends query to server and returns ResultSet
+	 * 
+	 * @param query - String query to be sent
+	 * @return ResultSet- returned from database
+	 */
 	public ResultSet getResult(String query){
 		Statement statement;
 		ResultSet result = null;
 		try {
+			//sends query to database
 			statement = connection.createStatement();
 			result = statement.executeQuery(query);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			//TODO: what if connection is broken
+			//executeQuery will throw SQLException if query is not possible
+			//so notify user of invalid Entry
+			control.invalidData();
 		}
 		return result;
 	}
 	
+	/**
+	 * sends sql command to database
+	 * @param sql - String sql command to send to database
+	 */
 	public void Update(String sql){
 		Statement statement;
 		try{
 			statement = connection.createStatement();
 			statement.executeUpdate(sql);
 		}catch(SQLException e){
-			e.printStackTrace();
+			//notifies user of invalid Entry
+			control.invalidData();
 		}
 	}
 	
-	public void addRecord(String col1, String col2,String table){
-		// puts together a query .. if col2 is a String it will be surrounded by '' otherwise it assumes that they are int
-		String query = "INSERT INTO " + table + " values (" + col1 + "," + (col2 instanceof String ? ("'"+col2+"'") : col2) + ")";//TODO:
+	/**
+	 * Adds new record to the table and notifies controller to update GUI
+	 * @param col1 - first column to update
+	 * @param col2 - second column to update
+	 * @param tableName - Name of table corresponding to database
+	 */
+	public void addRecord(String col1, String col2,String tableName){
+		String query = "INSERT INTO " + tableName + " values (" + addSingleQuotes(col1) + "," + addSingleQuotes(col2) + ")";
 		Update(query);
 		control.updateTable(control.dataBaseView.table, control.getTable());
 	}
 	
-	public void deleteRecord(String id,String col,String table){
-		String sql = "DELETE FROM " + table + " WHERE " + col + "=" + id;
+	/**
+	 * Deletes a record from the database
+	 * @param id - what key value to identify the record with(primary key)
+	 * @param col - what column to look in to find id
+	 * @param tableName - Name of table corresponding to database
+	 */
+	public void deleteRecord(String id,String col,String tableName){
+		String sql = "DELETE FROM " + tableName + " WHERE " + col + "=" + id;
+		System.out.println(sql);
+		Update(sql);
+		control.updateTable(control.dataBaseView.table, control.getTable());
+	}
+	/**
+	 * Update a record from the database
+	 * @param tableName - Name of table corresponding to database
+	 * @param set - what to set... in form of ='5'
+	 * @param where - how to identify the row columnName='value' (primary key)
+	 */
+	public void updateRecord(String tableName,String set, String where){
+		String sql = "UPDATE " + tableName + " SET " + set + " WHERE " + where;
 		System.out.println(sql);
 		Update(sql);
 		control.updateTable(control.dataBaseView.table, control.getTable());
 	}
 	
-	public void updateRecord(String table,String set, String where){
-		String sql = "UPDATE " + table + " SET " + set + " WHERE " + where;
-		System.out.println(sql);
-		Update(sql);
-		control.updateTable(control.dataBaseView.table, control.getTable());
-	}
 	
-	
-	
-	public int findNextIdInt(String table){
-		ResultSet result = getResult("SELECT MAX(ID) FROM " + table);
+	/**
+	 * Finds the highest Integer + 1 in column ID
+	 * @param tableName
+	 * @return - int next highest in column unless it is empty then returns 1
+	 */
+	public int findNextIdInt(String tableName){
+		ResultSet result = getResult("SELECT MAX(ID) FROM " + tableName);  //tells database to return Max value in ID
 		try {
-			result.next();
+			result.next();	//skips first index
 			String num = result.getString(1);
 			if(num==null)
 				return 1;
 			return Integer.parseInt( num ) + 1;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return 0;
+		return 1;
 		
 		
 	}
 	
-	//this works
-	public JTable getTable(JTable table, String tableName){
+	/**
+	 * 
+	 * @param table
+	 * @param tableName
+	 * @return
+	 */
+	public JTable getTable(JTable table, String tableName){//TODO: separate JTable from Model
 		
-		ResultSet result = getResult("SELECT * FROM " + tableName);
+		String query;
+		if(tableName.equals(Manager.ENROLLED_STUDENT))					//if table selected is EnrolledStudent do inner_join_query
+			query = Manager.INNER_JOIN_QUERY;
+		else
+			query = "SELECT * FROM " + tableName;
+		
+		ResultSet result = getResult(query);
 		try {
-			
+			//find the column names and store them in colNames
 			int numCols = result.getMetaData().getColumnCount();
 			Vector<String> colName = new Vector<String>(numCols);
 			for( int i = 1; i <= numCols; i++)
 				colName.add( result.getMetaData().getColumnName(i) );
 			
+			//get data from records
 			Vector<Object> data = new Vector<Object>();
 			while(result.next()){
 				
+				//store data from cells in records
 				Vector<String> record = new Vector<String>(numCols);
 				for(int i =1; i <= numCols;i++){
 					record.add(result.getString(i));
@@ -137,5 +193,14 @@ public class Manager {
 		return table;
 		
 	}
+	
+	
+	/**
+	 * Surrounds str with single quotes and returns new String
+	 * 'str'
+	 * @param str
+	 * @return - String str with single quotes around it
+	 */
+	public static String addSingleQuotes(String str){   return "'" + str + "'";  }
 
 }

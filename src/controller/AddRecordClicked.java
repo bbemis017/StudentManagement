@@ -18,8 +18,10 @@ public class AddRecordClicked implements ActionListener {
 
 		if (control.getTable().equals("EnrolledClasses")) {
 			JTextField col1 = new JTextField();
+			String col1Name = control.dataBaseView.table.getModel().getColumnName(0);
 			JTextField col2 = new JTextField();
-			Object[] fields = {"Column 1" ,col1,"Column 2",col2};
+			String col2Name = control.dataBaseView.table.getModel().getColumnName(2);
+			Object[] fields = {col1Name ,col1,col2Name,col2};
 			int result = JOptionPane.showConfirmDialog(null, fields,"Enter in data", JOptionPane.OK_CANCEL_OPTION);
 			if( result == JOptionPane.OK_OPTION)
 				control.dataBaseManager.addRecord(col1.getText(), col2.getText(), control.getTable());

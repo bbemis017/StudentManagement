@@ -31,8 +31,7 @@ public class DeleteRecordClicked implements ActionListener {
 					String col = "StudentID";
 					if (table.equals("Class"))
 						col = "ClassID";
-					control.dataBaseManager.deleteRecord(id, col,
-							"EnrolledClasses");
+
 					control.dataBaseManager.deleteRecord(id, "ID", table);
 				}
 			}
