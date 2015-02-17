@@ -1,10 +1,8 @@
 package controller;
 
-import java.awt.Window;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
+
 
 import database.Manager;
 import view.DataBaseView;
@@ -16,44 +14,61 @@ public class Controller {
 	public LoginView login;
 	public DataBaseView dataBaseView;
 	
-	private String table;
+	private String tableName;
 	
+	/**
+	 * Starts creates a new Manager for dataBase interactions and a login screen
+	 */
 	public Controller(){
 		dataBaseManager = new Manager(this);
 		login = new LoginView(this);
-		
-
 	}
 	
-	public void updateTable(JTable table,String tableName){
-		dataBaseManager.getTable(table, tableName);
+	/**
+	 * Gets data from the database and updates GUI
+	 */
+	public void updateTable(String tableName){
+		dataBaseManager.getTable(dataBaseView.table, tableName);
 		dataBaseView.updateTableView();
-		this.table = tableName;
+		this.tableName = tableName;
 	}
 	
+	/**
+	 * closing Login screen and starts the DataBaseView
+	 */
 	public void SuccessfulLogin() {
 		login.setVisible(false);
 		dataBaseView = new DataBaseView(this);
-		this.table = "Student";
+		this.tableName = "Student";
 		login.dispose();
-		updateTable(dataBaseView.table,"Student");
+		updateTable("Student");
 	}
 	
+	/**
+	 * 
+	 * @return - String Name of table currently being displayed
+	 */
+	public String getTableName() { return tableName; }
 	
-	public static void main(String[] args){
-		Controller control = new Controller();
-	}
-
-	public String getTable() {
-		return table;
-	}
-	
+	/**
+	 * Displays dialog for when the user has sent invalid data to the database
+	 */
 	public void invalidData(){
 		Object[] field ={"Invalid"};
 		JOptionPane.showConfirmDialog(null, field,"Invalid Data entry",JOptionPane.OK_OPTION);
 	}
+	
+	/**
+	 * Closes connection with database when application closes
+	 */
+	public void exit(){
+		dataBaseManager.closeConnection();
+	}
 
 
+	public static void main(String[] args){
+		 new Controller();
+	}
 
 
 	

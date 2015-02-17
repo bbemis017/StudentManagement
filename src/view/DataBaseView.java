@@ -2,13 +2,12 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-
-import javafx.scene.control.CheckBox;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -20,8 +19,11 @@ import controller.Controller;
 import controller.DeleteRecordClicked;
 import controller.TableSwitchClicked;
 import controller.UpdateRecordClicked;
+import database.Manager;
 
 public class DataBaseView extends JFrame{
+	
+	public static final int START_WIDTH=800, START_HEIGHT=700;
 	
 	private Controller control;
 	public JTable table;
@@ -32,17 +34,31 @@ public class DataBaseView extends JFrame{
 	
 	public DataBaseView(Controller control){
 		super("Database School");
-		setSize(800,700);
-		setResizable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setSize(START_WIDTH,START_HEIGHT);
+		setResizable(true);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setLocationRelativeTo(null);
 		this.control = control;
+		
+		//calls control.exit() when user closes window
+		addWindowListener(new WindowAdapter(){
+			@Override
+			public void windowClosing(WindowEvent e) {
+				control.exit();
+				System.exit(0);
+				
+			}
+		});
 		
 		createPanel();
 		add(panel);
 		
 		setVisible(true);
 	}
-
+	
+	/**
+	 * Creates Gui
+	 */
 	private void createPanel() {
 		
 		panel = new JPanel();
@@ -51,10 +67,12 @@ public class DataBaseView extends JFrame{
 		panel.setLayout( new BorderLayout(10, 10) );
 		tableSelection = new JPanel();
 		tableSelection.setLayout( new BoxLayout(tableSelection, BoxLayout.PAGE_AXIS));
+		
 		studentButton = new JButton("Student");
 		studentButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, studentButton.getMinimumSize().height));
 		studentButton.addActionListener(new TableSwitchClicked(control, "Student"));
 		tableSelection.add(studentButton);
+		
 		classButton = new JButton("Class");
 		classButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, classButton.getMinimumSize().height));
 		classButton.addActionListener(new TableSwitchClicked(control,"Class"));
@@ -64,6 +82,7 @@ public class DataBaseView extends JFrame{
 		enrolledButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, enrolledButton.getMinimumSize().height));
 		enrolledButton.addActionListener(new TableSwitchClicked(control,"EnrolledClasses"));
 		tableSelection.add(enrolledButton);
+		
 		
 		panel.add(tableSelection,BorderLayout.WEST);
 		
@@ -91,21 +110,21 @@ public class DataBaseView extends JFrame{
 		
 	}
 	
-	public void updateTableView(){
-		table.repaint();
-		table.setVisible(true);
-		scrollPane.setVisible(true);
-		panel.setVisible(true);
-		setVisible(true);
-		
-	}
+	/**
+	 * Updates Gui of table
+	 */
+	public void updateTableView(){ table.repaint(); }
 	
+	/**
+	 * Creates table
+	 */
 	private void createTable(){
 		
+		//temporary values
+		String[] columnNames = {" "," "};
+		String[][] data = { {" "},{" "} };
 		
-		String[] columnNames = {"one","two"};
-		String[][] data = { {"1","name"},{"2","name"} };
-		
+		//create table
 		table = new JTable(data,columnNames);
 		JTextField tf = new JTextField();
 		tf.setEditable(false);
@@ -113,6 +132,8 @@ public class DataBaseView extends JFrame{
 		table.setDefaultEditor(Object.class, editor);
 		scrollPane = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
+		
+		
 
 	}
 

@@ -1,9 +1,6 @@
 package view;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,13 +11,10 @@ import javax.swing.JTextField;
 
 import controller.Controller;
 import controller.LoginClicked;
-import database.Manager;
 
 public class LoginView extends JFrame{
 	
 	private final int WIDTH = 400, HEIGHT = 150;
-	
-	private Controller control;
 	
 	private JPanel panel;
 	private JButton loginButton;
@@ -33,13 +27,12 @@ public class LoginView extends JFrame{
 		setSize(WIDTH,HEIGHT);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
 		//TODO: appears in middle of screen
-		
 		
 		//create screen
 		createPanel();
 		
-		this.control = control;
 		
 		loginButton.addActionListener(new LoginClicked(control));
 		
@@ -48,6 +41,9 @@ public class LoginView extends JFrame{
 		
 	}
 	
+	/**
+	 * Creates Gui for login screen
+	 */
 	private void createPanel(){
 		panel = new JPanel();
 		panel.setLayout(null);
@@ -82,12 +78,22 @@ public class LoginView extends JFrame{
 		
 	}
 	
-	
+	/**
+	 * notifies user that the program failed to login to database
+	 */
 	public void loginFailed(){
 		failedLogin.setVisible(true);
 	}
 	
+	/**
+	 * 
+	 * @return - String text in username box
+	 */
 	public String getUserName(){ return userField.getText(); }
+	/**
+	 * 
+	 * @return - String text in password box
+	 */
 	public String getPassword(){ return new String( passwordField.getPassword() ); }
 	
 	

@@ -18,7 +18,7 @@ public class Manager {
 	
 	public static final String SQL_SERVER_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	public static final String URL = "jdbc:sqlserver://localhost;databaseName=School";
-	public static final String STUDENT="Student", CLASS="Class", ENROLLED_STUDENT="EnrolledStudent";
+	public static final String STUDENT="Student", CLASS="Class", ENROLLED_CLASSES="EnrolledClasses";
 	
 	public static final String INNER_JOIN_QUERY = "SELECT EnrolledClasses.StudentID, Student.Name, Class.ID,Class.Title FROM Student INNER JOIN EnrolledClasses " +
 			"ON Student.ID=EnrolledClasses.StudentID INNER JOIN Class ON Class.ID=EnrolledClasses.ClassID";
@@ -95,7 +95,7 @@ public class Manager {
 	public void addRecord(String col1, String col2,String tableName){
 		String query = "INSERT INTO " + tableName + " values (" + addSingleQuotes(col1) + "," + addSingleQuotes(col2) + ")";
 		Update(query);
-		control.updateTable(control.dataBaseView.table, control.getTable());
+		control.updateTable( control.getTableName());
 	}
 	
 	/**
@@ -106,10 +106,24 @@ public class Manager {
 	 */
 	public void deleteRecord(String id,String col,String tableName){
 		String sql = "DELETE FROM " + tableName + " WHERE " + col + "=" + id;
-		System.out.println(sql);
 		Update(sql);
-		control.updateTable(control.dataBaseView.table, control.getTable());
+		control.updateTable(control.getTableName());
 	}
+	
+	/**
+	 * deletes a record that requires a composite key from the database
+	 * @param idName1 - String Name of first Id column
+	 * @param id1 - String id value of record
+	 * @param idName2 -String  Name of second Id column
+	 * @param id2 - String id value of record
+	 * @param tableName - String name of table corresponding to database
+	 */
+	public void deleteCompositeRecord(String idName1,String id1,String idName2,String id2, String tableName){
+		String sql = "DELETE FROM " + tableName + " WHERE " + idName1 +"=" + id1 + " AND " + idName2 + "=" + id2 + ";";
+		Update(sql);
+		control.updateTable(tableName);
+	}
+	
 	/**
 	 * Update a record from the database
 	 * @param tableName - Name of table corresponding to database
@@ -120,7 +134,7 @@ public class Manager {
 		String sql = "UPDATE " + tableName + " SET " + set + " WHERE " + where;
 		System.out.println(sql);
 		Update(sql);
-		control.updateTable(control.dataBaseView.table, control.getTable());
+		control.updateTable( control.getTableName());
 	}
 	
 	
@@ -146,15 +160,16 @@ public class Manager {
 	}
 	
 	/**
+	 * Retrieves the designated table from the database
 	 * 
-	 * @param table
-	 * @param tableName
+	 * @param table - String JTable that already exists onScreen
+	 * @param tableName - String name of table corresponding to database
 	 * @return
 	 */
-	public JTable getTable(JTable table, String tableName){//TODO: separate JTable from Model
+	public JTable getTable(JTable table, String tableName){
 		
 		String query;
-		if(tableName.equals(Manager.ENROLLED_STUDENT))					//if table selected is EnrolledStudent do inner_join_query
+		if(tableName.equals(Manager.ENROLLED_CLASSES))					//if table selected is EnrolledStudent do inner_join_query
 			query = Manager.INNER_JOIN_QUERY;
 		else
 			query = "SELECT * FROM " + tableName;
@@ -202,5 +217,16 @@ public class Manager {
 	 * @return - String str with single quotes around it
 	 */
 	public static String addSingleQuotes(String str){   return "'" + str + "'";  }
+	
+	/**
+	 * closes connection to database
+	 */
+	public void closeConnection(){
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
