@@ -32,7 +32,7 @@ public class DataBaseView extends JFrame{
 	private JScrollPane scrollPane;
 	private JButton studentButton, classButton, enrolledButton, addButton, updateButton, deleteButton;
 	
-	public DataBaseView(Controller control){
+	public DataBaseView(final Controller control){
 		super("Database School");
 		setSize(START_WIDTH,START_HEIGHT);
 		setResizable(true);
