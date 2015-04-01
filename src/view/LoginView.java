@@ -12,6 +12,7 @@ import javax.swing.JTextField;
 import controller.Controller;
 import controller.LoginClicked;
 
+@SuppressWarnings("serial")
 public class LoginView extends JFrame{
 	
 	private final int WIDTH = 400, HEIGHT = 150;

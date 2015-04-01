@@ -9,7 +9,6 @@ import java.sql.Statement;
 
 import java.util.Vector;
 
-import javax.swing.JTable;
 
 
 import controller.Controller;
@@ -162,11 +161,11 @@ public class Manager {
 	/**
 	 * Retrieves the designated table from the database
 	 * 
-	 * @param table - String JTable that already exists onScreen
 	 * @param tableName - String name of table corresponding to database
-	 * @return
+	 * @return -Vector<Object> contains a vector<Object> of table data and a vector<Object>
+	 * of Column names
 	 */
-	public JTable getTable(JTable table, String tableName){
+	public Vector<Object> getTable(String tableName){
 		
 		String query;
 		if(tableName.equals(Manager.ENROLLED_CLASSES))					//if table selected is EnrolledStudent do inner_join_query
@@ -196,16 +195,20 @@ public class Manager {
 				data.add(record);
 			}
 			
+			//stores data and colNames in one vector to be returned together
+			 Vector<Object> dataAndCol = new Vector<Object>(2);
+			 dataAndCol.add(data);
+			 dataAndCol.add(colName);
+			 
+			 return dataAndCol;
 			
-			 JTable temp = new JTable(data,colName);
-			 table.setModel( temp.getModel() );
 			
 		} catch (SQLException e) {
 			
 			e.printStackTrace();
 		}
 		
-		return table;
+		return null;//TODO: account for when this function returns null values
 		
 	}
 	

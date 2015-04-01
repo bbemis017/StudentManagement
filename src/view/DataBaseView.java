@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
@@ -19,8 +20,9 @@ import controller.Controller;
 import controller.DeleteRecordClicked;
 import controller.TableSwitchClicked;
 import controller.UpdateRecordClicked;
-import database.Manager;
 
+
+@SuppressWarnings("serial")
 public class DataBaseView extends JFrame{
 	
 	public static final int START_WIDTH=800, START_HEIGHT=700;
@@ -113,7 +115,13 @@ public class DataBaseView extends JFrame{
 	/**
 	 * Updates Gui of table
 	 */
-	public void updateTableView(){ table.repaint(); }
+	public void updateTableView(Vector<Object> data, Vector<Object> ColNames){
+		JTable temp = new JTable(data,ColNames);
+		table.setModel( temp.getModel() );
+		table.repaint();
+	}
+	
+
 	
 	/**
 	 * Creates table

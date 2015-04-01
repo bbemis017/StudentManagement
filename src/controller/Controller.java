@@ -1,6 +1,8 @@
 package controller;
 
 
+import java.util.Vector;
+
 import javax.swing.JOptionPane;
 
 
@@ -25,12 +27,16 @@ public class Controller {
 	}
 	
 	/**
+	 * @param String- tableName - name of table in database to display on screen
 	 * Gets data from the database and updates GUI
 	 */
+	@SuppressWarnings("unchecked")
 	public void updateTable(String tableName){
-		dataBaseManager.getTable(dataBaseView.table, tableName);
-		dataBaseView.updateTableView();
-		this.tableName = tableName;
+		Vector<Object> dataAndCol = dataBaseManager.getTable(tableName);
+		if( dataAndCol != null){
+			dataBaseView.updateTableView( (Vector<Object>)dataAndCol.get(0) , (Vector<Object>) dataAndCol.get(1) );
+			this.tableName = tableName;
+		}
 	}
 	
 	/**
